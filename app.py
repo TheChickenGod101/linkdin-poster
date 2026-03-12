@@ -119,7 +119,8 @@ def api_stats():
 def api_generate_stream():
     def stream():
         try:
-            yield f"data: {json.dumps({'step':'quote','msg':'Generating quote with Claude AI\u2026'})}\n\n"
+            msg1 = json.dumps({"step": "quote", "msg": "Generating quote with Claude AI\u2026"})
+            yield f"data: {msg1}\n\n"
             used = load_used_quotes()
             qd = None
             for _ in range(5):
@@ -128,23 +129,28 @@ def api_generate_stream():
                     qd = d
                     break
             if not qd:
-                yield f"data: {json.dumps({'step':'error','msg':'Could not generate a unique quote. Try again.'})}\n\n"
+                msg_err = json.dumps({"step": "error", "msg": "Could not generate a unique quote. Try again."})
+                yield f"data: {msg_err}\n\n"
                 return
-            preview_text = f'Quote ready \u2014 "{qd["quote"][:60]}\u2026"'
-            yield f"data: {json.dumps({'step':'quote_done','msg':preview_text})}\n\n"
+            preview_text = "Quote ready \u2014 \"" + qd["quote"][:60] + "\u2026\""
+            yield f"data: {json.dumps({'step': 'quote_done', 'msg': preview_text})}\n\n"
 
-            yield f"data: {json.dumps({'step':'image','msg':'Generating matched image with DALL-E 3 HD\u2026 (~20 s)'})}\n\n"
+            msg2 = json.dumps({"step": "image", "msg": "Generating matched image with DALL-E 3 HD\u2026 (~20 s)"})
+            yield f"data: {msg2}\n\n"
             img_path = generate_quote_image(qd["quote"], qd["author"], qd.get("scene", ""))
 
-            yield f"data: {json.dumps({'step':'meta','msg':'Stripping image metadata\u2026'})}\n\n"
+            msg3 = json.dumps({"step": "meta", "msg": "Stripping image metadata\u2026"})
+            yield f"data: {msg3}\n\n"
             strip_metadata(img_path)
 
             image_id = str(uuid.uuid4())
             temp_store[image_id] = {"path": img_path, "created": datetime.now(), "quote_data": qd}
 
-            yield f"data: {json.dumps({'step':'done','image_id':image_id,'quote':qd['quote'],'author':qd['author'],'description':qd['description']})}\n\n"
+            msg_done = json.dumps({"step": "done", "image_id": image_id, "quote": qd["quote"], "author": qd["author"], "description": qd["description"]})
+            yield f"data: {msg_done}\n\n"
         except Exception as e:
-            yield f"data: {json.dumps({'step':'error','msg':str(e)})}\n\n"
+            msg_exc = json.dumps({"step": "error", "msg": str(e)})
+            yield f"data: {msg_exc}\n\n"
 
     return Response(stream(), mimetype="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
