@@ -148,23 +148,59 @@ python scheduler.py
 
 ## Deploying on Proxmox LXC
 
-1. Create a Debian/Ubuntu LXC container with a bridged network interface
-2. Clone the repo and set up your `.env`:
-   ```bash
-   git clone https://github.com/TheChickenGod101/linkdin-poster.git
-   cd linkdin-poster
-   cp .env.example .env
-   nano .env   # fill in your keys
-   ```
-3. Install system deps and Python packages:
-   ```bash
-   apt update && apt install -y python3 python3-pip fonts-liberation fonts-dejavu-core
-   pip install -r requirements.txt
-   ```
-4. Update font paths in `image_generator.py` (see Linux font setup above)
-5. Run `python app.py` — accessible at `http://<container-ip>:5000` from your network
+### 1. Install system dependencies
 
-To run it persistently, create a systemd service:
+```bash
+apt update && apt install -y git python3 python3-venv python3-full \
+    fonts-liberation fonts-dejavu-core
+```
+
+### 2. Clone the repo
+
+```bash
+git clone https://github.com/TheChickenGod101/linkdin-poster.git
+cd linkdin-poster
+```
+
+### 3. Create a virtual environment and install packages
+
+Debian/Ubuntu block system-wide pip installs — use a venv:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 4. Set up your `.env`
+
+```bash
+cp .env.example .env
+nano .env   # fill in your API keys
+```
+
+### 5. Update font paths for Linux
+
+In `image_generator.py`, replace the `_FONT_CANDIDATES` list:
+
+```python
+_FONT_CANDIDATES = [
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",  # Windows fallback
+]
+```
+
+### 6. Run
+
+```bash
+source venv/bin/activate   # if not already active
+python3 app.py
+```
+
+Accessible at `http://<container-ip>:5000` from any device on your network.
+
+### 7. Run persistently with systemd
 
 ```ini
 # /etc/systemd/system/linkedin-poster.service
@@ -173,8 +209,8 @@ Description=LinkedIn Quote Poster
 After=network.target
 
 [Service]
-WorkingDirectory=/path/to/linkedin-quote-poster
-ExecStart=python3 app.py
+WorkingDirectory=/root/linkdin-poster
+ExecStart=/root/linkdin-poster/venv/bin/python3 app.py
 Restart=always
 
 [Install]
@@ -183,6 +219,7 @@ WantedBy=multi-user.target
 
 ```bash
 systemctl enable --now linkedin-poster
+systemctl status linkedin-poster   # check it's running
 ```
 
 ---
