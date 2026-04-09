@@ -315,4 +315,8 @@ if __name__ == "__main__":
     print("  other devices on your network can connect.")
     print("=" * 55)
 
+    _start_scheduler()
+    print("  Scheduler started automatically.")
+    print("=" * 55)
+
     serve(app, host="0.0.0.0", port=5000, threads=4)
