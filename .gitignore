@@ -1,3 +1,4 @@
 .env
 generated_images/
 used_quotes.json
+__pycache__/

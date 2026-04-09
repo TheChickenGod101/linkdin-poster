@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import requests
@@ -104,7 +105,7 @@ def _add_text_overlay(image_path: str, quote: str, author: str) -> None:
 
 def generate_quote_image(quote: str, author: str, scene: str = "") -> str:
     """
-    1. Generates a background scene with DALL-E 3 HD matched to the quote's mood.
+    1. Generates a background scene with gpt-image-1 HD matched to the quote's mood.
     2. Overlays the quote and author using Pillow for pixel-perfect text.
     Returns the local file path.
     """
@@ -122,10 +123,10 @@ def generate_quote_image(quote: str, author: str, scene: str = "") -> str:
     )
 
     response = client.images.generate(
-        model="dall-e-3",
+        model="gpt-image-1",
         prompt=prompt,
         size="1024x1024",
-        quality="hd",
+        quality="high",
         n=1,
     )
 
@@ -134,7 +135,7 @@ def generate_quote_image(quote: str, author: str, scene: str = "") -> str:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     file_path = os.path.join(IMAGES_DIR, f"quote_{safe_author}_{timestamp}.png")
 
-    img_data = requests.get(response.data[0].url, timeout=30).content
+    img_data = base64.b64decode(response.data[0].b64_json)
     with open(file_path, "wb") as f:
         f.write(img_data)
 

@@ -135,7 +135,7 @@ def api_generate_stream():
             preview_text = "Quote ready \u2014 \"" + qd["quote"][:60] + "\u2026\""
             yield f"data: {json.dumps({'step': 'quote_done', 'msg': preview_text})}\n\n"
 
-            msg2 = json.dumps({"step": "image", "msg": "Generating matched image with DALL-E 3 HD\u2026 (~20 s)"})
+            msg2 = json.dumps({"step": "image", "msg": "Generating matched image with gpt-image-1 HD… (~20 s)"})
             yield f"data: {msg2}\n\n"
             img_path = generate_quote_image(qd["quote"], qd["author"], qd.get("scene", ""))
 

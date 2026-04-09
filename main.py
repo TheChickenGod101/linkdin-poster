@@ -65,7 +65,7 @@ def run_daily_post() -> None:
         print(f'  Scene: {scene[:80]}...')
 
     # 2. Generate image
-    print("\n[2/5] Generating image with DALL-E 3 HD (mood-matched)...")
+    print("\n[2/5] Generating image with gpt-image-1 HD (mood-matched)...")
     image_path = generate_quote_image(quote, author, scene)
 
     # 3. Strip metadata
